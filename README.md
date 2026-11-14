@@ -8,9 +8,9 @@ Javel lifecycle wrapper for a Drizzle database. `connect()` registers the client
 
 ```bash
 bun add javel-drizzle-adapter
-bun add drizzle-orm
+bun add drizzle-orm@rc
 bun add postgres           # or mysql2 / better-sqlite3 / @libsql/client
-bun add -d drizzle-kit
+bun add drizzle-kit@rc -D
 ```
 
 ### 2. Configure in `config/database.ts`
@@ -22,7 +22,7 @@ Pass `{ schema }` when you want Drizzle's relational `db.query` API.
 import { env } from "javel-jcc/helpers";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as schema from "../database/schema";
+import * as schema from "database/schema";
 
 const connectionString = env(
   "DATABASE_URL",
@@ -38,6 +38,13 @@ export const database = {
     pool: client,
   },
 };
+```
+
+Generate the migration from your schema, then apply it:
+
+```bash
+bunx drizzle-kit generate
+bunx drizzle-kit migrate
 ```
 
 ### 3. Provider (`app/Providers/DrizzleServiceProvider.ts`)
@@ -83,7 +90,7 @@ Inject the Drizzle database instance directly into a service or controller const
 import { Inject } from "javel-jcc";
 import { InjectDrizzle } from "javel-drizzle-adapter";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type * as schema from "../../database/schema";
+import type * as schema from "database/schema";
 
 @Inject()
 export class UsersService {
@@ -106,7 +113,7 @@ import { Controller } from "javel-jcc/Routing/Controller";
 import { Action, Inject } from "javel-jcc";
 import { InjectDrizzle } from "javel-drizzle-adapter";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type * as schema from "../../../database/schema";
+import type * as schema from "database/schema";
 
 @Inject()
 export class UserController extends Controller {
@@ -129,7 +136,7 @@ export class UserController extends Controller {
 
 ```typescript
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type * as schema from "../database/schema";
+import type * as schema from "database/schema";
 
 const db = app<PostgresJsDatabase<typeof schema>>("drizzle");
 const users = await db.query.users.findMany();
